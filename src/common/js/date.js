@@ -2,7 +2,7 @@
  * Created by yi on 2016-12-27.
  */
 
-export function formatDate(date, fmt) {
+export function formatDate (date, fmt) {
    if (/(y+)/.test(fmt)) {
     fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
    }
@@ -22,6 +22,6 @@ export function formatDate(date, fmt) {
   return fmt;
 }
 
-function padLeftZero(str) {
+function padLeftZero (str) {
   return ('00' + str).substr(str.length);
 }
