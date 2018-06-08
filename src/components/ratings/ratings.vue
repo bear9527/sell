@@ -1,5 +1,5 @@
 <template>
-<div class="ratings" ref="rt">
+<div class="ratings" ref="myRating">
   <div>
     <div class="ratingtitle">
       <div class="titleleft">
@@ -60,11 +60,11 @@
 </template>
 
 <script>
-import BScroll from 'better-scroll';
 import star from 'components/star/star';
 import split from 'components/split/split';
 import ratingselect from 'components/ratingselect/ratingselect';
 import {formatDate} from '../../common/js/date';
+import BScroll from 'better-scroll';
 
 // const POSITIVE = 0;
 // const NEGATIVE = 1;
@@ -83,35 +83,16 @@ export default {
       onlycontent: true
     };
   },
-  created () {
-    this.$http.get('/api/ratings').then(response => {
-      // get body data
-      const res = response.body;
-      if (res.errno === 0) {
-        this.ratings = res.data;
-        this.scroll.refresh();
-      }
-    }, response => {
-      // error callback
-    });
-    this.$nextTick(() => {
+  methods: {
+    _initScroll () {
       if (!this.scroll) {
-          console.log('new');
-          this.scroll = new BScroll(this.$refs.rt, {
+          this.scroll = new BScroll(this.$refs.myRating, {
             click: true
           });
-          this.scroll.refresh();
         } else {
-          console.log('refresh');
           this.scroll.refresh();
         }
-    });
-    this.$nextTick(() => {
-        console.log(this.$refs);
-        this.scroll = new BScroll(this.$refs.rt, {click: true});
-      });
-  },
-  methods: {
+    },
     needShow (type, text) {
       if (this.onlycontent && !text) {
         return false;
@@ -134,6 +115,28 @@ export default {
         this.scroll.refresh();
       });
     }
+  },
+  swatch: {
+    'seller' () {
+      this._initScroll();
+    }
+  },
+  created () {
+    this.$http.get('/api/ratings').then(response => {
+      // get body data
+      const res = response.body;
+      if (res.errno === 0) {
+        this.ratings = res.data;
+        this.$nextTick(() => {
+          this._initScroll();
+        });
+      }
+    }, response => {
+      // error callback
+    });
+  },
+  ready () {
+    console.log(this.seller);
   },
   filters: {
     formatDate (time) {

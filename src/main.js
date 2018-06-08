@@ -29,5 +29,5 @@ let app = new Vue({
   router,
   render: h => h(App)
 }).$mount('#app');
-  // router.push('/goods');
+  router.push('/goods');
 export default app;
