@@ -8,9 +8,9 @@
           <star :size="36" :score="seller.score"></star><span class="rat">({{seller.ratingCount}})</span>月售{{seller.sellCount}}单
         </div>
       </div>
-      <div class="header-right">
-        <span class="icon-favorite"></span>
-        <h2 class="shoucang">快收藏</h2>
+      <div class="header-right" @click="toggleFavorite($event)">
+        <span class="icon-favorite" :class="{'active':favorite}"></span>
+        <h2 class="shoucang">{{favoriteText}}</h2>
       </div>
       <span class="hx border-1px"></span>
       <div class="header-bottom">
@@ -41,8 +41,8 @@
     <div class="real-scene">
       <h1 class="title">商家实景</h1>
       <div class="pic-wrapper" ref="picWrapper">
-        <ul v-show="seller.pics">
-          <li v-for="item in seller.pics" :key="item.num"><img :src="item"></li>
+        <ul v-show="seller.pics" ref="picUl">
+          <li v-for="item in seller.pics" :key="item.num"><img :src="item" ref="picImg"></li>
         </ul>
       </div>
     </div>
@@ -59,6 +59,7 @@
 
 <script>
 import BScroll from 'better-scroll';
+import {saveToLocal, loadFromLocal} from '../../common/js/store';
 import star from 'components/star/star';
 import split from 'components/split/split';
 export default {
@@ -69,51 +70,72 @@ export default {
   },
   data () {
     return {
+      favorite: (() => {
+        return loadFromLocal(this.seller.id, 'favorite', false);
+      })(),
+      // favorite: false,
       classMap: ['decrease', 'discount', 'special', 'invoice', 'guarantee']
     };
   },
   methods: {
+    toggleFavorite (event) {
+        console.log(event);
+        if (!event._constructed) {
+          return;
+        }
+        this.favorite = !this.favorite;
+        saveToLocal(this.seller.id, 'favorite', this.favorite);
+      },
     _initScroll () {
-      if (!this.scroll) {
-        this.scroll = new BScroll(this.$refs.mySeller, {
-          click: true
+      if (!this.scroll2) {
+        this.$nextTick(() => {
+          this.scroll2 = new BScroll(this.$refs.mySeller, {
+            click: true
+          });
         });
       } else {
-        this.scroll.refresh();
+        this.scroll2.refresh();
       }
+    },
+    _initPicWrapper () {
       if (!this.picWrapper) {
-        console.log(this.picWrapper);
-        this.picWrapper = new BScroll(this.$refs.picWrapper, {
-          click: true,
-          scrollX: true,
-          eventPassthrough: 'vertical'
-        });
+        if (this.seller.pics) {
+          this.$nextTick(() => {
+            let picWidth = 120;
+            let margin = 6;
+            let width = (picWidth + margin) * this.seller.pics.length - margin;
+            this.$refs.picUl.style.width = width + 'px';
+            this.picWrapper = new BScroll(this.$refs.picWrapper, {
+              click: true,
+              scrollX: true,
+              eventPassthrough: 'vertical'
+            });
+          });
+          }
       } else {
         this.picWrapper.refresh();
       }
     }
   },
-  ready () {
-    this._initScroll();
+  computed: {
+    favoriteText () {
+      return this.favorite ? '已收藏' : '收藏';
+    }
   },
   created () {
-    // this.$http.get('/api/seller/').then(response => {
-    //   console.log(response);
-    // },response => {
-    // });
-    // this.$nextTick(() => {
-    //   if (!this.scroll) {
-    //     this.scroll = new BScroll(this.$refs.seller, {
-    //       click: true
-    //     });
-    // console.log(this.$refs.sellers);
-    //   } else {
-    //     this.scroll.refresh;
+    // const ERR_OK = 0;
+    // this.$http.get('/api/seller/?id=' + this.seller.id).then(response => {
+    //   response = response.data;
+    //   if (response.errno === ERR_OK) {
+    //     this.seller = Object.assign({}, this.seller, response.data);
+    //     // console.log(this.seller.id);
     //   }
+    // }, response => {
     // });
-    this.$nextTick(() => {
-      this._initScroll();
-    });
+  },
+  activated: function () {
+    this._initScroll();
+    this._initPicWrapper();
   },
   components: {
     star,
@@ -160,8 +182,11 @@ export default {
           .icon-favorite
             color:#ccc
             font-size:24px
-            color:rgb(240,20,20)
+            width:50px
+            margin:5px
             line-height:24px
+          .active
+            color:rgb(240,20,20)
           .shoucang
             font-size:10px
             color:rgb(77,85,93)

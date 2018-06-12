@@ -3,7 +3,7 @@
  * Created by yi on 2016-12-28.
  * @return Object {id:12334}
  */
-export function urlParse() {
+export function urlParse () {
   let url = window.location.search;
   let obj = {};
   let reg = /[?&][^?&]+=[^?&]]+/g;

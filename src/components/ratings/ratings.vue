@@ -116,7 +116,7 @@ export default {
       });
     }
   },
-  swatch: {
+  watch: {
     'seller' () {
       this._initScroll();
     }

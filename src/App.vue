@@ -30,28 +30,38 @@
 </template>
 
 <script>
+import {urlParse} from 'common/js/util';
 import header1 from 'components/header/header';
 // import data from 'common/json/data.json';
 export default {
   name: 'app',
   data () {
     return {
-      seller: {}
+      seller: {
+        id: (() => {
+          let queryParam = urlParse();
+          return queryParam.id;
+        })()
+      }
     };
   },
   created () {
-      // GET /someUrl
-    this.$http.get('/api/seller').then(response => {
-      // get body data
-      const res = response.body;
-      if (res.errno === 0) {
-        this.seller = res.data;
+    const ERR_OK = 0;
+    this.$http.get('/api/seller/?id=' + this.seller.id).then(response => {
+      response = response.data;
+      if (response.errno === ERR_OK) {
+        this.seller = Object.assign({}, this.seller, response.data);
+        console.log(this.seller.id);
       }
-    }, response => {
-      // error callback
-    });
-
-    // this.seller = data.seller;
+      }, response => {});
+      // GET /someUrl
+    // this.$http.get('/api/seller').then(response => {
+    //   const res = response.body;
+    //   if (res.errno === 0) {
+    //     this.seller = res.data;
+    //   }
+    // }, response => {
+    // });
   },
   components: { 'v-header': header1 }
   };
